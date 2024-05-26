@@ -4,8 +4,8 @@ Validating different scenarios where browsers send cookies with different `SameS
 
 [samsite.diduthink.com](https://samesite.diduthink.com)
 
-The `SameSite` sandbox is requires two domains for cross-domain request checks.
-When running in a two-domain configuration use the `-altDomain` and `-primaryDomain` options.
+The `SameSite` sandbox requires two domains for cross-domain request checks.
+When running in a two-domain configuration, use the `-altDomain` and `-primaryDomain` options.
 
 QR code images are generated on the fly, and stored on the filesystem.
 For this to work the program needs a directory `-qrImgDir` that it can write to.
@@ -30,7 +30,7 @@ Options:
 The entire site is self contained in a single compiled binary.
 Static files are embedded using Go `embed`.
 
-In order to build, first build the assets:
+First build the assets:
 
 ```
 ./bin/build-assets
