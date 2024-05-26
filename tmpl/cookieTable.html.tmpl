@@ -1,0 +1,15 @@
+<table class="w-[145px] m-auto">
+  <tbody class="divide-y divide-gray-200">
+  {{ range .Cookies }}
+  {{ $dispName := .SameSite }}
+  {{ if eq .SameSite "" }}
+    {{ $dispName = "(not set)" }}
+  {{ end }}
+  <tr>
+    <td class="text-left pl-2 py-1">{{ $dispName }}</td>
+    <td class="px-1 py-1"><span :class="{ 'filter grayscale': !hasCookie('{{ .Name }}') }" x-text="`🍪`"></span></td>
+    <td class="px-1 py-1 w-[40px]"><span :class="{ 'hidden': !hasCookie('{{ .Name }}') }">{{ if .Received }}✅{{ end}}</span></td>
+  </tr>
+  {{ end }}
+  </tbody>
+</table>

@@ -1,0 +1,8 @@
+{{ template "header" . }}
+<div x-data @message.window="receiveMessage($event.data)" class="w-[150px] mx-auto h-screen border border-stone-500 text-center">
+  <h3 class="bg-stone-500 text-white font-semibold text-center">IFrame Cookies</h3>
+  <div class="cookieTable">
+    {{ template "cookieTable.html.tmpl" . }}
+  </div>
+</div>
+{{ template "footer" . }}

@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+set -xeuf -o pipefail
+
+HOST="i.jarv.org"
+
+./bin/build
+ssh root@$HOST "sudo systemctl stop samesite.service"
+scp samesite root@$HOST:/opt/samesite/samesite
+ssh root@$HOST "sudo systemctl start samesite.service"
+rm -f samesite
