@@ -43,5 +43,3 @@ export CGO_ENABLED GOOS GOARCH
 go build -ldflags "-w" -o samesite !(*_test).go
 ```
 Alternatively, the script `./bin/watch` will watch for changes and rebuild everything when ever a change is detected (requires the tool `entr` to run).
-
-This is the most fastest way to validate changes during development.
