@@ -4,9 +4,20 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="The value of the SameSite cookie attribute determines whether it gets sent during cross-site requests. This site explores different scenarios for different values of the SameSite attribute.">
   <link rel="stylesheet" href="/static/css/tailwind.css?{{ .CacheBust }}" />
   <script src="/static/js/index.js?{{ .CacheBust }}" defer></script>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍪</text></svg>">
+  <script>
+  window.goatcounter = {
+      path: function(p) { return "samesite" + p }
+  }
+  </script>
+  {{ if eq .Host "samesite.diduthink.com" }}
+    <script data-goatcounter="https://s.diduthink.com/c" async src="//s.diduthink.com/cjs"></script>
+  {{ else if eq .Host "samesite.jarv.org" }}
+    <script data-goatcounter="https://s.jarv.org/c" async src="//s.jarv.org/cjs"></script>
+  {{ end }}
   <title>SameSite</title>
 </head>
   <body x-data="cookie" class="font-sans bg-gray-100 text-gray-900" x-init="$interval(() => updateCookies(), 100)">

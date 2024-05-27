@@ -178,10 +178,12 @@ func main() {
 			CacheBust     string
 			LinkUrl       string
 			PrimaryDomain string
+			Host          string
 		}{
 			CacheBust:     cacheBust,
 			LinkUrl:       linkUrl.String(),
 			PrimaryDomain: *primaryDomain,
+			Host:          r.Host,
 		}
 
 		if err := templates.ExecuteTemplate(w, "link.html.tmpl", d); err != nil {
@@ -196,10 +198,12 @@ func main() {
 			Cookies      []CookieData
 			CacheBust    string
 			SecureCookie bool
+			Host         string
 		}{
 			Cookies:      genCookieData(r),
 			CacheBust:    cacheBust,
 			SecureCookie: secureCookie(r),
+			Host:         "", // Not needed in Iframe
 		}
 
 		setCookies(w, r)
@@ -215,8 +219,12 @@ func main() {
 	})
 
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path != "/" { // Check path here
-			http.NotFound(w, r)
+		if *primaryDomain != *altDomain && r.Host == *altDomain {
+			redirUrl := &url.URL{
+				Scheme: scheme(r),
+				Host:   *primaryDomain,
+			}
+			http.Redirect(w, r, redirUrl.String(), http.StatusFound)
 			return
 		}
 
@@ -243,6 +251,7 @@ func main() {
 			CacheBust        string
 			AltUrl           string
 			SecureCookie     bool
+			Host             string
 		}{
 			QRCodeURL:        qrCodeURL.String(),
 			QRCodeURLExplain: qrCodeURLExplain.String(),
@@ -250,6 +259,7 @@ func main() {
 			CacheBust:        cacheBust,
 			AltUrl:           altUrl.String(),
 			SecureCookie:     secureCookie(r),
+			Host:             r.Host,
 		}
 
 		setCookies(w, r)

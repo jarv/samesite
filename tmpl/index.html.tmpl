@@ -1,5 +1,4 @@
 {{ template "header" . }}
-
 {{ define "secureCookiesToggle" }}
   <label class="inline-flex items-center justify-center cursor-pointer border border-gray-200 rounded-md shadow-sm pl-2">
     <input type="checkbox" value="" x-on:change="secureCookiesTrue($event)" x-model="isSecureTrue" x-init="initializeCheckbox()" class="sr-only peer">
@@ -31,7 +30,7 @@
   </div>
 {{ end }}
 {{ define "browser" }}
-  <div class="relative w-[60px] mr-[12px]">
+  <div class="relative w-[60px] mr-[18px]">
   {{ range $index, $item := . }}
     {{ if eq $index 0 }}
       <img src="static/img/{{ . }}.png" alt="{{ . }}" class="relative z-50">
@@ -61,33 +60,39 @@
   <div class="border-t border-gray-300 flex-grow"></div>
 </div>
 {{ end }}
+<!-- Start -->
 
-<div class="max-w-xl mx-auto py-8 text-center">
-  <h1 class="text-3xl font-bold mb-2">Setting a Cookie's {{ template "attr" "SameSite" }} Attribute</h1>
+<div class="max-w-xl mx-auto py-8 text-center relative">
+  <noscript class="font-extralight">
+    Please enable Javascript in your browser.
+    This page has interactive components that requires it work properly.
+  </noscript>
+  <div class="flex justify-end mr-2">
+      <a href="https://github.com/jarv/samesite" class="relative -mb-4">
+          <img class="w-auto h-6" src="/static/img/github-32px.png?{{ .CacheBust }}" alt="GitHub">
+      </a>
+  </div>
+  <h1 class="md:text-3xl text-xl font-bold mb-2">SameSite Cookie Attribute</h1>
+  <hr class="mb-2">
   <p class="mb-2">
   The {{ template "attr" "SameSite" }} attribute determines whether a cookie gets sent during cross-site requests.
-  There are four possible values for the {{ template "attr" "SameSite" }} attribute:
+  There are four possible values:
   </p>
 
-  <table class="mx-8 mb-2 text-center bg-gray-50 border border-blue-300 shadow-sm">
+  <table class="bg-gray-50 mx-6 mb-2 rounded-lg">
     <tbody class="text-sm divide-y divide-gray-100 text-left">
       <tr><td class="px-2 font-semibold">Strict</td><td class="p-1">Cookies are only sent in a first-party context or navigating directly to a site.</td></tr>
       <tr><td class="px-2 font-semibold">Lax</td><td class="p-1">Cookies are sent in some cross-site contexts, but not with embedded content.</td></tr>
       <tr><td class="px-2 font-semibold">None</td><td class="p-1">Cookies are sent in all contexts, including cross-origin requests</td></tr>
-      <tr><td class="px-2 font-semibold whitespace-nowrap">(not set)</td><td class="p-1">If the SameSite attribute is not specified, the behavior depends on the browser's default settings.</td></tr>
+      <tr><td class="px-2 font-semibold whitespace-nowrap">(not set)</td><td class="p-1">If the SameSite attribute is not specified, the behavior is browser dependent.</td></tr>
     </tbody>
   </table>
 
   <p class="mb-2">
-  How a browser determines a cross-site request can vary depending on the context of the request and the browser vendor.
+    How a browser determines a cross-site request will vary depending on the context of the request and the browser vendor.
   </p>
-
   <p class="mb-2">
-    To learn more, follow some <a class="text-blue-500 hover:text-blue-700 hover:underline font-semibold" href="#explain1">some interactive examples</a> below or try different actions in the <a class="text-blue-500 hover:text-blue-700 hover:underline font-semibold" href="#playground">SameSite playground</a>.
-  </p>
-  <p>
-  Everything on this site uses HTTPs (no mixed content) and the findings in the examples use the latest version of each browser at the time of writing.
-  If you see errors or have suggestions please <a class="text-blue-500 hover:text-blue-700 hover:underline font-semibold" href="https://github.com/jarv/samesite/issues">submit an issue</a>.
+    To learn more, follow <a class="text-blue-500 hover:text-blue-700 hover:underline font-semibold" href="#explain1">some interactive examples</a> below or try the <a class="text-blue-500 hover:text-blue-700 hover:underline font-semibold" href="#playground">SameSite playground</a>.
   </p>
 
   <div id="explain1" class="{{ $explainClass }}">
@@ -146,16 +151,20 @@
     <div class="flex flex-col w-3/4 mx-auto mb-2">
       {{ template "didUKnow" }}
       <p>
-        When {{ template "attr" "SameSite" }} is <span class="font-semibold">not set</span> on cookies, Chrome treats it as {{ template "attr" "Lax" }}.
+        When {{ template "attr" "SameSite" }} is <span class="font-semibold">not set</span> on cookies, Chrome default the cookie to {{ template "attr" "SameSite=Lax" }}.
         For more info see <a class="{{ $linkClass }}" href="https://www.chromium.org/updates/same-site/faq/">the Chromium SameSite FAQ</a>.
       </p>
     </div>
   </div>
 
   <div id="explain2" class="{{ $explainClass }}">
-    <h3 class="{{ $explainHClass }}"><a href="#explain2">#2 Clicking a link to this site from different domain</a></h3>
+    <h3 class="{{ $explainHClass }}"><a href="#explain2">#2 Clicking a link to this site from different site</a></h3>
     <p class="mb-2 px-2">
-    When users navigate to a site from a hyperlink, cookies with the {{ template "attr" "Strict" }} attribute will not be sent.
+    When navigating to this site from a different site (e.g., clicking a link), the browser will receive cookies with {{ template "attr" "SameSite=Strict" }},
+    but they won't be sent to the server on the first page load.
+    </p>
+    <p class="mb-2 px-2">
+    Try the following to remove all cookies and retrieve them again from the server, by accessing this site from a different site:
     </p>
 
     <ul class="mb-2">
@@ -174,9 +183,9 @@
       </li>
       <li>
         <a class="w-fit p-1 rounded-md shadow-sm mx-auto flex border border-gray-200 justify-center items-center text-blue-500 hover:text-blue-700 hover:underline font-semibold"
-          target="_blank" href="{{ .AltUrl }}/link/explain2{{ if not .SecureCookie }}?sc=false{{ end }}">
+          href="{{ .AltUrl }}/link/explain2{{ if not .SecureCookie }}?sc=false{{ end }}">
           <img class="w-auto h-6" src="/static/img/link-32px.png?{{ .CacheBust }}">
-          <span>Link back to this site from a different domain</span>
+          <span>Link back to this site from a different site</span>
         </a>
       </li>
     </ol>
@@ -194,7 +203,7 @@
         </tr>
         <tr>
           <td class="pl-2">{{ template "browser" (arr "chrome" "safari" "firefox") }}</td>
-          <td class="p-2">When returning to this site by clicking on a link, the cookie with the {{ template "attr" "Strict" }} attribute will not be sent.</td>
+          <td class="p-2">When returning to this site by clicking on a link, the cookie with the {{ template "attr" "SameSite=Strict" }} will not be sent.</td>
         </tr>
       </tbody>
     </table>
@@ -202,10 +211,10 @@
     <div class="flex flex-col w-3/4 mx-auto">
       {{ template "didUKnow" }}
       <p>
-        Even if you hit refresh on the bowser, it <span class="font-semibold">won't send cookie</span> with the {{ template "attr" "Strict" }} attribute.
+        Even if you hit refresh on the bowser, it <span class="font-semibold">won't send cookie</span> with the {{ template "attr" "SameSite=Strict" }}.
         Chrome and Safari however will send it with a
         <button @click="location.reload()" class="{{ $buttonStyle }} text-sm">
-            <span>locaction.reload()</span>
+            <span>location.reload()</span>
         </button>
       </p>
     </div>
@@ -213,10 +222,9 @@
 
 
   <div id="explain3" class="{{ $explainClass }}">
-    <h3 class="{{ $explainHClass }}"><a href="#explain3">#3 302 redirect from a different domain</a></h3>
+    <h3 class="{{ $explainHClass }}"><a href="#explain3">#3 302 redirect from a different site</a></h3>
     <p class="mb-2 px-2">
-    When users navigate to a site from a hyperlink, cookies with the {{ template "attr" "Strict" }} attribute will not be sent.
-    This is also true in some cases when redirecting from a different site.
+    Just like when navigating to a site from a different site, cookies with the {{ template "attr" "SameSite=Strict" }} will not be sent on a 302 redirect.
     </p>
 
     <ul class="mb-2">
@@ -240,7 +248,7 @@
         <a class="w-fit p-1 rounded-md shadow-sm mx-auto flex border border-gray-200 justify-center items-center text-blue-500 hover:text-blue-700 hover:underline font-semibold mb-2"
           href="{{ .AltUrl }}/redirect/explain3{{ if not .SecureCookie }}?sc=false{{ end }}">
           <img class="w-auto h-6" src="/static/img/redirect_solid-32px.png?{{ .CacheBust }}">
-          <span>302 redirect from a different domain</span>
+          <span>302 redirect from a different site</span>
         </a>
       </li>
     </ol>
@@ -258,33 +266,28 @@
         </tr>
         <tr>
           <td class="pl-2">{{ template "browser" (arr "safari" "firefox") }}</td>
-          <td class="p-2">Only {{ template "attr" "Lax" }} and {{ template "attr" "None" }} cookies are sent after being redirected to this site from a different domain.</td>
+          <td class="p-2">Only {{ template "attr" "Lax" }} and {{ template "attr" "None" }} cookies are sent after being redirected to this site from a different site.</td>
         </tr>
         <tr>
           <td class="pl-2">{{ template "browser" (arr "chrome") }}</td>
-          <td class="p-2">All cookies are sent after a 302 redirect from a different domain.</td>
+          <td class="p-2">All cookies are sent after a 302 redirect from a different site.</td>
         </tr>
       </tbody>
     </table>
     <div class="flex flex-col w-3/4 mx-auto">
       {{ template "didUKnow" }}
       <p>
-        A 302 redirect from a different domain is treated differently by Chrome than a coming via a link.
-        For both Safari and Firefox hitting the refresh button won't send the SameSite cookie, but a
-        <button @click="location.reload()" class="{{ $buttonStyle }} text-sm">
-            <span>locaction.reload()</span>
-        </button>
-        will.
+        A 302 redirect from a different site is treated differently by Chrome than a coming via a link.
       </p>
     </div>
   </div>
 
   <div id="explain4" class="{{ $explainClass }}">
-    <h3 class="{{ $explainHClass }}"><a href="#explain4">#4 Cookies with secure=false</a></h3>
+    <h3 class="{{ $explainHClass }}"><a href="#explain4">#4 Cookies with {{ template "attr" "secure=false" }}</a></h3>
     <p class="mb-2 mx-2">
       Cookies are sent with a {{ template "attr" "secure" }} attribute, that can be set to {{ template "attr" "true" }} or {{ template "attr" "false" }}.
       If {{ template "attr" "secure" }}  is set to {{ template "attr" "true" }} then cookies can only be sent over secure (HTTPS) connections.
-      If {{ template "attr" "SameSite" }} is set to {{ template "attr" "None" }}, then it is necessary to set secure to true, but not all browsers behave the same way.
+      If {{ template "attr" "SameSite=None" }}, then it is important to set {{ template "attr" "secure=true" }}, but not all browsers enforce this restriction.
     </p>
 
     <ul class="mb-2">
@@ -315,11 +318,11 @@
         </tr>
         <tr>
           <td class="pl-2">{{ template "browser" (arr "safari" "firefox") }}</td>
-          <td class="p-2">For desktop browsers, all cookies are sent over an HTTPS connection with {{ template "attr" "secure" }} set to {{ template "attr" "false" }}.</td>
+          <td class="p-2">It's likely that all cookies are received with {{ template "attr" "secure=false" }}.</td>
         </tr>
         <tr>
           <td class="pl-2">{{ template "browser" (arr "chrome") }}</td>
-          <td class="p-2">Cookies with {{ template "attr" "SameSite" }} set to {{ template "attr" "None" }} cannot be received unless the {{ template "attr" "secure" }} attribute is set on the cookie.</td>
+          <td class="p-2">Cookies with {{ template "attr" "SameSite=None" }} cannot be received unless {{ template "attr" "secure=true" }} is set on the cookie.</td>
         </tr>
       </tbody>
     </table>
@@ -344,7 +347,7 @@
         <button @click="location.reload()" class="{{ $buttonStyle }}">
           <div class="flex justify-center items-center">
             <img class="w-auto h-6" src="/static/img/refresh-32px.png?{{ .CacheBust }}">
-            <span class="ml-1">Refresh Page in the new browser session</span>
+            <span class="ml-1">location.reload() in the new browser session</span>
           </div>
         </button>
       </li>
@@ -364,7 +367,7 @@
         </tr>
         <tr>
           <td class="pl-2">{{ template "browser" (arr "chrome" "firefox" "safari") }}</td>
-          <td class="p-2">Cookies with {{ template "attr" "SameSite" }} set to {{ template "attr" "Strict" }} cannot be received on the initial page load, when navigating to a site from a QR code.</td>
+          <td class="p-2">Just like navigating to page from a different site, when visiting a page from a QR code the cookie with the {{ template "attr" "SameSite=Strict" }} will not be sent.</td>
         </tr>
       </tbody>
     </table>
@@ -372,7 +375,7 @@
     <div class="flex flex-col w-3/4 mx-auto">
       {{ template "didUKnow" }}
       <p>
-      If you scan a QR code, it is just like coming from a different domain via a hyperlink.
+      If you scan a QR code, it is just like navigating to a page from a different site.
       </p>
     </div>
   </div>
@@ -393,12 +396,12 @@
         <a class="w-fit p-1 mx-auto flex border border-gray-200 justify-center items-center md:text-lg text-md text-blue-500 hover:text-blue-700 hover:underline font-semibold mb-2"
           href="{{ .AltUrl }}/redirect/playground{{ if not .SecureCookie }}?sc=false{{ end }}">
           <img class="w-auto h-6" src="/static/img/redirect_solid-32px.png?{{ .CacheBust }}">
-          <span>302 redirect from a different domain</span>
+          <span>302 redirect from a different site</span>
         </a>
         <a class="w-fit p-1 mx-auto flex border border-gray-200 justify-center items-center md:text-lg text-md text-blue-500 hover:text-blue-700 hover:underline font-semibold"
-          target="_blank" href="{{ .AltUrl }}/link/playground{{ if not .SecureCookie }}?sc=false{{ end }}">
+          href="{{ .AltUrl }}/link/playground{{ if not .SecureCookie }}?sc=false{{ end }}">
           <img class="w-auto h-6" src="/static/img/link-32px.png?{{ .CacheBust }}">
-          <span>Link back to this site from a different domain</span>
+          <span>Link back to this site from a different site</span>
         </a>
       </div>
       <div class="flex items-center mb-2">
@@ -433,11 +436,18 @@
       </div>
     </div>
   </div>
-
-  Site built with ♡ using <a class="{{ $linkClass }}" href="https://go.dev/">Go</a>, <a class="{{ $linkClass }}" href="https://alpinejs.dev/">AlpineJS</a>,
-  and <a class="{{ $linkClass }}" href="https://tailwindcss.com/">Tailwind CSS</a>.
-  Icons courtesy of <a class="{{ $linkClass }}" href="https://openmoji.org/">OpenMoji</a>.
-  If you see errors or have suggestions please
-  <a class="{{ $linkClass }}" href="https://github.com/jarv/samesite/issues">submit an issue</a>.
+  <p class="mb-6">
+  I hope you enjoyed walking through these SameSite secnarios.
+  While this page doesn't cover all of them, I would love to add new ones if you are aware of other interesting SameSite behavior.
+  </p>
+  <hr>
+  <p class="mb-2 text-sm mt-2">
+  Site built with ♡ using
+  <a class="{{ $linkClass }}" href="https://go.dev/">Go</a>,
+  <a class="{{ $linkClass }}" href="https://alpinejs.dev/">AlpineJS</a>,
+  <a class="{{ $linkClass }}" href="https://tailwindcss.com/">Tailwind CSS</a>,
+  and <a class="{{ $linkClass }}" href="https://openmoji.org/">OpenMoji</a>.
+  For corrections or feedback please feel free to drop me an <a href="mailto:samesite@jarv.org" class="{{ $linkClass }}">email 📧</a> or create an issue via this project's <a class="{{ $linkClass }}" href="https://github.com/jarv/samesite/issues">GitHub</a>.
+  </p>
 </div>
 {{ template "footer" . }}
