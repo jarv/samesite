@@ -2,7 +2,12 @@
   "name": "cookie",
   "version": "1.0.0",
   "description": "cookies!",
-  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "build:js": "node build.js",
+    "build:css": "npx tailwindcss -o static/css/tailwind.css",
+    "build": "npm run build:js && npm run build:css"
+  },
   "author": "",
   "license": "MIT",
   "dependencies": {
@@ -11,12 +16,12 @@
     "alpinejs": "^3.13.7",
     "esbuild": "^0.20.2",
     "js-cookie": "^3.0.5",
-    "tailwindcss": "^3.4.1",
-    "typescript": "^5.4.2"
+    "tailwindcss": "^3.4.1"
   },
   "devDependencies": {
     "@alpine-collective/toolkit-interval": "^1.0.2",
     "@types/alpinejs": "^3.13.9",
-    "@types/js-cookie": "^3.0.6"
+    "@types/js-cookie": "^3.0.6",
+    "prettier": "3.4.2"
   }
 }
