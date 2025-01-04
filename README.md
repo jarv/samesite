@@ -30,16 +30,24 @@ Options:
 The entire site is self contained in a single compiled binary.
 Static files are embedded using Go `embed`.
 
-First build the assets:
+1. [Install `mise`](https://mise.jdx.dev/getting-started.html)
+
+
+2. Install dependencies:
 
 ```
-./bin/build-assets
+mise install
 ```
 
-And then build the binary:
+3. Build the assets:
 
 ```
-export CGO_ENABLED GOOS GOARCH
-go build -ldflags "-w" -o samesite !(*_test).go
+mise run build-assets
 ```
-Alternatively, the script `./bin/watch` will watch for changes and rebuild everything when ever a change is detected (requires the tool `entr` to run).
+
+4. Build the binary:
+
+```
+go build -ldflags '-w' -o samesite
+```
+Alternatively, the script `mise run watch` will watch for changes and rebuild everything when ever a change is detected.
