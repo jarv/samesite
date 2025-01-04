@@ -3446,7 +3446,7 @@ ${expression ? 'Expression: "' + expression + '"\n\n' : ""}`, el);
     cookies: [],
     isSecure: true,
     isPartitioned: true,
-    urlFragment: "",
+    urlSearch: "",
     differentSite(baseUrl, type) {
       const url = new URL(window.location.href);
       const fragment = btoa(`${url.search}${url.hash}`);
@@ -3460,7 +3460,7 @@ ${expression ? 'Expression: "' + expression + '"\n\n' : ""}`, el);
       const url = new URL(window.location.href);
       this.isSecure = ((_a = url.searchParams) == null ? void 0 : _a.get("sc")) === "false" ? false : true;
       this.isPartitioned = ((_b = url.searchParams) == null ? void 0 : _b.get("pc")) === "false" ? false : true;
-      this.urlFragment = `${url.hash.replaceAll("#", "")}${url.search}`;
+      this.urlSearch = url.search;
     },
     updateCookies() {
       this.cookies = Object.getOwnPropertyNames(api.get());
@@ -3502,7 +3502,7 @@ ${expression ? 'Expression: "' + expression + '"\n\n' : ""}`, el);
       } else {
         url.searchParams.set(key, "false");
       }
-      this.urlFragment = `${url.hash.replaceAll("#", "")}${url.search}`;
+      this.urlSearch = url.search;
       history.replaceState(null, "", url.toString());
     },
     postMessageIFrames(msg) {

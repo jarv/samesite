@@ -126,6 +126,17 @@
     To learn more, follow <a class="text-blue-500 hover:text-blue-700 hover:underline font-semibold" href="#explain1">some interactive examples</a> below or try the <a class="text-blue-500 hover:text-blue-700 hover:underline font-semibold" href="#playground">SameSite playground</a>.
   </p>
 
+  <hr>
+  <p class="mt-2 mb-2">
+    There is also the option to toggle whether {{ template "attr" "Secure" }} or {{ template "attr" "Partitioned" }} is set for the cookies that are received by the browser.
+
+    <table class="bg-gray-50 mx-6 mb-2 rounded-lg">
+      <tbody class="text-sm divide-y divide-gray-100 text-left">
+        <tr><td class="px-2 font-semibold">Secure</td><td class="p-1">Ensures cookies are only sent over HTTPS connections.</td></tr>
+        <tr><td class="px-2 font-semibold">Partitioned</td><td class="p-1">Tells the browser that the cookie is designed to work with browser partitioning, where cookie storage is isolated based on the top-level site making the request.</td></tr>
+      </tbody>
+    </table>
+  </p>
   <div id="explain1" class="{{ $explainClass }}">
     <h3 class="{{ $explainHClass }}"><a href="#explain1">#1 Cookies in an IFrame</a></h3>
     <p class="mb-2 px-2">
@@ -213,7 +224,7 @@
       </li>
       <li>
         <a class="w-fit p-1 rounded-md shadow-sm mx-auto flex border border-gray-200 justify-center items-center text-blue-500 hover:text-blue-700 hover:underline font-semibold"
-          :href="`{{ .AltUrl }}/link/${urlFragment}`">
+          :href="`{{ .AltUrl }}/link/explain2${urlSearch}`">
           <img class="w-auto h-6" src="/static/img/link-32px.png?{{ .CacheBust }}">
           <span>Link back to this site from a different site</span>
         </a>
@@ -275,7 +286,7 @@
       </li>
       <li>
         <a class="w-fit p-1 rounded-md shadow-sm mx-auto flex border border-gray-200 justify-center items-center text-blue-500 hover:text-blue-700 hover:underline font-semibold mb-2"
-          :href="`{{ .AltUrl }}/redirect/${urlFragment}`">
+          :href="`{{ .AltUrl }}/redirect/explain3${urlSearch}`">
           <img class="w-auto h-6" src="/static/img/redirect_solid-32px.png?{{ .CacheBust }}">
           <span>302 redirect from a different site</span>
         </a>
@@ -356,7 +367,7 @@
         </tr>
         <tr>
           <td class="pl-2">{{ template "browser" (list "chrome") }}</td>
-          <td class="p-2">Cookies with {{ template "attr" "SameSite=None" }} cannot be received unless {{ template "attr" "secure=true" }} is set on the cookie.</td>
+          <td class="p-2">For Cookies without {{ template "attr" "partitioned" }} set, {{ template "attr" "SameSite=None" }} cannot be received unless {{ template "attr" "secure=true" }} is set on the cookie. For {{ template "attr" "partitioned" }} Cookies, no cookies will be received with {{ template "attr" "secure=false" }}.</td>
         </tr>
       </tbody>
     </table>
@@ -432,12 +443,12 @@
       </div>
       <div class="w-full mb-2">
         <a class="w-fit p-1 mx-auto flex border border-gray-200 justify-center items-center md:text-lg text-md text-blue-500 hover:text-blue-700 hover:underline font-semibold mb-2"
-          :href="`{{ .AltUrl }}/redirect/${urlFragment}`">
+          :href="`{{ .AltUrl }}/redirect/playground${urlSearch}`">
           <img class="w-auto h-6" src="/static/img/redirect_solid-32px.png?{{ .CacheBust }}">
           <span>302 redirect from a different site</span>
         </a>
         <a class="w-fit p-1 mx-auto flex border border-gray-200 justify-center items-center md:text-lg text-md text-blue-500 hover:text-blue-700 hover:underline font-semibold"
-          :href="`{{ .AltUrl }}/link/${urlFragment}`">
+          :href="`{{ .AltUrl }}/link/playground${urlSearch}`">
           <img class="w-auto h-6" src="/static/img/link-32px.png?{{ .CacheBust }}">
           <span>Link back to this site from a different site</span>
         </a>
@@ -472,7 +483,7 @@
     </div>
   </div>
   <p class="mb-6">
-    I hope you enjoyed walking through these SameSite secnarios.
+    I hope you enjoyed walking through these SameSite scenarios.
     If you are aware of other interesting SameSite behavior, please let me know!
   </p>
   <hr>
@@ -480,8 +491,7 @@
   Site built with ♡ using
   <a class="{{ $linkClass }}" href="https://go.dev/">Go</a>,
   <a class="{{ $linkClass }}" href="https://alpinejs.dev/">AlpineJS</a>,
-  <a class="{{ $linkClass }}" href="https://tailwindcss.com/">Tailwind CSS</a>,
-  and <a class="{{ $linkClass }}" href="https://openmoji.org/">OpenMoji</a>.
+  and <a class="{{ $linkClass }}" href="https://tailwindcss.com/">Tailwind CSS</a>.
   For corrections or feedback please feel free to drop me an <a href="mailto:samesite@jarv.org" class="{{ $linkClass }}">email 📧</a>
   or <a class="{{ $linkClass }}" href="https://github.com/jarv/samesite/issues">create an issue</a>.
   </p>

@@ -9,7 +9,7 @@ Alpine.data("cookie", () => ({
   cookies: [],
   isSecure: true,
   isPartitioned: true,
-  urlFragment: "",
+  urlSearch: "",
   differentSite(baseUrl, type) {
     const url = new URL(window.location.href);
     const fragment = btoa(`${url.search}${url.hash}`);
@@ -22,7 +22,7 @@ Alpine.data("cookie", () => ({
     const url = new URL(window.location.href);
     this.isSecure = url.searchParams?.get("sc") === "false" ? false : true;
     this.isPartitioned = url.searchParams?.get("pc") === "false" ? false : true;
-    this.urlFragment = `${url.hash.replaceAll("#", "")}${url.search}`;
+    this.urlSearch = url.search;
   },
   updateCookies() {
     this.cookies = Object.getOwnPropertyNames(Cookies.get());
@@ -67,7 +67,7 @@ Alpine.data("cookie", () => ({
       url.searchParams.set(key, "false");
     }
 
-    this.urlFragment = `${url.hash.replaceAll("#", "")}${url.search}`;
+    this.urlSearch = url.search;
     history.replaceState(null, "", url.toString());
   },
   postMessageIFrames(msg) {
