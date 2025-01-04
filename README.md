@@ -1,8 +1,8 @@
-## SameSite.DidUThink.com
+## samesite.surveymoji.com
 
 Validating different scenarios where browsers send cookies with different `SameSite` attributes.
 
-[samsite.diduthink.com](https://samesite.diduthink.com)
+[samsite.surveymoji.com](https://samesite.surveymoji.com)
 
 The `SameSite` sandbox requires two domains for cross-domain request checks.
 When running in a two-domain configuration, use the `-altDomain` and `-primaryDomain` options.

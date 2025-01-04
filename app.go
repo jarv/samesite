@@ -14,6 +14,7 @@ import (
 	"path"
 	"time"
 
+	sprig "github.com/Masterminds/sprig/v3"
 	"github.com/yeqown/go-qrcode/v2"
 	"github.com/yeqown/go-qrcode/writer/standard"
 )
@@ -24,8 +25,9 @@ const (
 )
 
 type Cookie struct {
-	Name     string
-	SameSite http.SameSite
+	Name        string
+	SameSite    http.SameSite
+	SameSiteStr string
 }
 
 var (
@@ -36,31 +38,24 @@ var (
 	jsonLog       = flag.Bool("json", false, "use json logs")
 	cacheBust     = time.Now().Format("20060102150405")
 
-	funcMap = template.FuncMap{
-		"arr": arr,
-	}
-	tmpl      = template.New("").Funcs(funcMap)
-	templates = template.Must(tmpl.ParseFS(tmplFiles, "tmpl/*.tmpl"))
-
 	//go:embed static
 	staticFiles embed.FS
 
 	//go:embed tmpl/*.tmpl
 	tmplFiles embed.FS
 
-	logger      *slog.Logger
-	sameSiteStr = map[http.SameSite]string{
-		http.SameSiteStrictMode:  "Strict",
-		http.SameSiteLaxMode:     "Lax",
-		http.SameSiteNoneMode:    "None",
-		http.SameSiteDefaultMode: "",
-	}
+	logger    *slog.Logger
+	templates = template.Must(
+		template.New("base").
+			Funcs(sprig.FuncMap()).
+			ParseFS(tmplFiles, "tmpl/*.tmpl"),
+	)
 
 	cookies = []Cookie{
-		{"sameSiteStrict", http.SameSiteStrictMode},
-		{"sameSiteLax", http.SameSiteLaxMode},
-		{"sameSiteNone", http.SameSiteNoneMode},
-		{"sameSiteDefault", http.SameSiteDefaultMode},
+		{"sameSiteStrict", http.SameSiteStrictMode, "Strict"},
+		{"sameSiteLax", http.SameSiteLaxMode, "Lax"},
+		{"sameSiteNone", http.SameSiteNoneMode, "None"},
+		{"sameSiteDefault", http.SameSiteDefaultMode, ""},
 	}
 )
 
@@ -111,7 +106,7 @@ type CookieData struct {
 func genCookieData(r *http.Request) []CookieData {
 	cookieData := make([]CookieData, 0, 4)
 	for _, c := range cookies {
-		d := CookieData{Name: c.Name, SameSite: sameSiteStr[c.SameSite]}
+		d := CookieData{Name: c.Name, SameSite: c.SameSiteStr}
 		d.Received = gotCookie(c.Name, r)
 		cookieData = append(cookieData, d)
 	}
@@ -245,21 +240,23 @@ func main() {
 		}
 
 		d := struct {
-			QRCodeURL        string
-			QRCodeURLExplain string
-			Cookies          []CookieData
-			CacheBust        string
-			AltUrl           string
-			SecureCookie     bool
-			Host             string
+			QRCodeURL         string
+			QRCodeURLExplain  string
+			Cookies           []CookieData
+			CacheBust         string
+			AltUrl            string
+			SecureCookie      bool
+			PartitionedCookie bool
+			Host              string
 		}{
-			QRCodeURL:        qrCodeURL.String(),
-			QRCodeURLExplain: qrCodeURLExplain.String(),
-			Cookies:          genCookieData(r),
-			CacheBust:        cacheBust,
-			AltUrl:           altUrl.String(),
-			SecureCookie:     secureCookie(r),
-			Host:             r.Host,
+			QRCodeURL:         qrCodeURL.String(),
+			QRCodeURLExplain:  qrCodeURLExplain.String(),
+			Cookies:           genCookieData(r),
+			CacheBust:         cacheBust,
+			AltUrl:            altUrl.String(),
+			SecureCookie:      secureCookie(r),
+			PartitionedCookie: partitionedCookie(r),
+			Host:              r.Host,
 		}
 
 		setCookies(w, r)
@@ -368,8 +365,9 @@ func genQRCode(imgFname string, r *http.Request, destPath string) (*url.URL, err
 }
 
 type CookieAttr struct {
-	SameSite string `json:"sameSite"`
-	Secure   bool   `json:"secure"`
+	SameSite    string `json:"sameSite"`
+	Secure      bool   `json:"secure"`
+	Partitioned bool   `json:"partitioned"`
 }
 
 func secureCookie(r *http.Request) bool {
@@ -385,22 +383,35 @@ func secureCookie(r *http.Request) bool {
 	return sc != "false"
 }
 
-func setCookies(w http.ResponseWriter, r *http.Request) {
-	secure := secureCookie(r)
+func partitionedCookie(r *http.Request) bool {
+	qV := r.URL.Query()
+	var pc string
 
+	if r.Method == "POST" {
+		pc = r.PostFormValue("pc")
+	} else {
+		pc = qV.Get("pc")
+	}
+
+	return pc != "false"
+}
+
+func setCookies(w http.ResponseWriter, r *http.Request) {
 	for _, c := range cookies {
 		attr := CookieAttr{
-			SameSite: sameSiteStr[c.SameSite],
-			Secure:   secure,
+			SameSite:    c.SameSiteStr,
+			Secure:      secureCookie(r),
+			Partitioned: partitionedCookie(r),
 		}
 		jsonData, _ := json.Marshal(attr)
 		cookie := &http.Cookie{
-			Name:     c.Name,
-			Value:    base64.StdEncoding.EncodeToString(jsonData),
-			Expires:  time.Now().Add(7 * 24 * time.Hour),
-			Path:     "/",
-			SameSite: c.SameSite,
-			Secure:   attr.Secure,
+			Name:        c.Name,
+			Value:       base64.StdEncoding.EncodeToString(jsonData),
+			Expires:     time.Now().Add(7 * 24 * time.Hour),
+			Path:        "/",
+			SameSite:    c.SameSite,
+			Secure:      attr.Secure,
+			Partitioned: attr.Partitioned,
 		}
 
 		http.SetCookie(w, cookie)

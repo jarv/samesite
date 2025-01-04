@@ -1,19 +1,52 @@
 {{ template "header" . }}
-{{ define "secureCookiesToggle" }}
-  <label class="inline-flex items-center justify-center cursor-pointer border border-gray-200 rounded-md shadow-sm pl-2">
-    <input type="checkbox" value="" x-on:change="secureCookiesTrue($event)" x-model="isSecureTrue" x-init="initializeCheckbox()" class="sr-only peer">
+{{ define "resetImg" }}
+<svg class="h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+  <!-- Circular arrow path -->
+  <path
+    d="M20 12c0 4.4-3.6 8-8 8s-8-3.6-8-8 3.6-8 8-8c2.1 0 4 .8 5.4 2.2L20 4v5h-5l2.4-2.4C16.2 5.4 14.2 4.2 12 4.2c-4.3 0-7.8 3.5-7.8 7.8s3.5 7.8 7.8 7.8 7.8-3.5 7.8-7.8"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+</svg>
+{{ end }}
+{{ define "refreshImg" }}
+<svg class="h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+  <!-- First curved arrow -->
+  <path
+    d="M6.5 12c0-3 2.5-5.5 5.5-5.5V4.5L15.5 7l-3.5 2.5V7c-2.75 0-5 2.25-5 5"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="1.5"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+  <!-- Second curved arrow -->
+  <path
+    d="M17.5 12c0 3-2.5 5.5-5.5 5.5v-2.5L8.5 17l3.5 2.5V17c2.75 0 5-2.25 5-5"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="1.5"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+</svg>
+{{ end }}
+
+{{ define "cookieToggle" }}
+  {{ $model := "isSecure" }}
+  {{ if (eq .Attr "partitioned") }}
+    {{ $model = "isPartitioned" }}
+  {{ end }}
+  <label class="inline-flex items-center justify-center cursor-pointer m-2 w-full">
+    <input type="checkbox" value="" x-on:change.prevent="toggle('{{ $model }}', $event)" x-model="{{ $model }}" x-init="initializeCheckbox()" class="sr-only peer">
     <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-    <span class="w-[200px] text-md">
-      {{ if eq . "toggleOff" }}
-        Ensure this is toggled <span class="font-semibold">off</span> so that <span class="font-semibold font-mono">secure</span> is set to <span class="font-semibold">false</span>
-      {{ else if eq . "toggleOn" }}
-        Ensure this is toggled <span class="font-semibold">on</span> so that <span class="font-semibold font-mono">secure</span> is set to <span class="font-semibold">true</span>
-      {{ else }}
-        When toggled on, cookies have the attribute <span class="font-semibold font-mono">secure</span> set to <span class="font-semibold">true</span>
-      {{ end }}
-    </span>
+    <span class="w-[150px] ml-2 pl-2 text-md text-left border-l-4" x-html="isSetText('{{ .Attr }}')"></span>
   </label>
 {{ end }}
+
 {{ $linkClass := "text-blue-500 hover:text-blue-700 hover:underline font-semibold" }}
 {{ $IFrameHeight := "160" }}
 {{ $buttonStyle := "w-fit p-1 border border-gray-200 rounded-md shadow-sm" }}
@@ -102,25 +135,24 @@
     </p>
 
     <ul class="mb-2">
-      {{ if not .SecureCookie }}
-      <li class="my-1">{{ template "secureCookiesToggle" "toggleOn" }}</li>
-      {{ end }}
       <li class="my-1">
-        <button @click="deleteAllCookies()" class="{{ $buttonStyle }}">
+        <button @click="reset()" class="{{ $buttonStyle }}">
           <div class="flex justify-center items-center">
-            <img class="w-auto h-6" src="/static/img/wastebasket-32px.png?{{ .CacheBust }}">
-            <span class="ml-1">Remove all cookies</span>
+            {{ template "resetImg" }}
+            <span class="ml-1">Reset Cookies</span>
           </div>
         </button>
       </li>
-      <li class="my-1"> <button @click="ajaxGET()" class="{{ $buttonStyle }}">Send a {{ template "GET" }} request</button></li>
-      <li><button @click="ajaxGET()" class="{{ $buttonStyle }}">Send another {{ template "GET" }} request</button></li>
+      <li class="my-1"> <button @click="ajax()" class="{{ $buttonStyle }}">Send a {{ template "GET" }} request</button></li>
+      <li><button @click="ajax()" class="{{ $buttonStyle }}">Send another {{ template "GET" }} request</button></li>
     </ul>
 
     <div class="flex flex-row justify-center my-4">
       {{ template "browserCookies" . }}
-      <iframe class="diduthinkIFrame" src="{{ .AltUrl }}/iframe{{ if not .SecureCookie }}?sc=false{{ end }}" frameborder="0" height="{{ $IFrameHeight }}" scrolling="no" width="150"></iframe>
+      <iframe class="surveymojiIFrame" src="{{ .AltUrl }}/iframe{{ if not .SecureCookie }}?sc=false{{ end }}" frameborder="0" height="{{ $IFrameHeight }}" scrolling="no" width="150"></iframe>
     </div>
+    {{ template "cookieToggle" (dict "Attr" "secure") }}
+    {{ template "cookieToggle" (dict "Attr" "partitioned") }}
     {{ template "cookieLegend" }}
 
     <p class="mb-2 px-2">
@@ -136,11 +168,11 @@
           </th>
         </tr>
         <tr>
-          <td class="pl-2">{{ template "browser" (arr "chrome" "firefox") }}</td>
+          <td class="pl-2">{{ template "browser" (list "chrome" "firefox") }}</td>
           <td class="p-2">{{ template "attr" "SameSite" }} values of {{ template "attr" "Strict" }} and {{ template "attr" "Lax" }} are <span class="font-semibold">not sent</span> in the IFrame because it is a cross site context</td>
         </tr>
         <tr>
-          <td class="pl-2">{{ template "browser" (arr "safari") }}</td>
+          <td class="pl-2">{{ template "browser" (list "safari") }}</td>
           <td class="p-2">No cookies are sent in the cross-site context inside the IFrame</td>
         </tr>
       </tbody>
@@ -167,21 +199,21 @@
 
     <ul class="mb-2">
       <li class="my-1">
-        <button @click="deleteAllCookies()" class="{{ $buttonStyle }}">
+        <button @click="reset()" class="{{ $buttonStyle }}">
           <div class="flex justify-center items-center">
-            <img class="w-auto h-6" src="/static/img/wastebasket-32px.png?{{ .CacheBust }}">
-            <span class="ml-1">Remove all cookies</span>
+            {{ template "resetImg" }}
+            <span class="ml-1">Reset Cookies</span>
           </div>
         </button>
       </li>
       <li class="my-1">
-        <button @click="ajaxGET()" class="{{ $buttonStyle }}">
+        <button @click="ajax()" class="{{ $buttonStyle }}">
           Send a {{ template "GET" }} request to receive cookies
         </button>
       </li>
       <li>
         <a class="w-fit p-1 rounded-md shadow-sm mx-auto flex border border-gray-200 justify-center items-center text-blue-500 hover:text-blue-700 hover:underline font-semibold"
-          href="{{ .AltUrl }}/link/explain2{{ if not .SecureCookie }}?sc=false{{ end }}">
+          :href="`{{ .AltUrl }}/link/${urlFragment}`">
           <img class="w-auto h-6" src="/static/img/link-32px.png?{{ .CacheBust }}">
           <span>Link back to this site from a different site</span>
         </a>
@@ -191,6 +223,8 @@
     <div class="flex flex-row justify-center my-4">
       {{ template "browserCookies" . }}
     </div>
+    {{ template "cookieToggle" (dict "Attr" "secure") }}
+    {{ template "cookieToggle" (dict "Attr" "partitioned") }}
 
     <table class="mx-8 mb-2 text-center bg-gray-50 rounded-lg border border-blue-50 shadow-sm">
       <tbody class="text-sm divide-y divide-gray-100">
@@ -200,7 +234,7 @@
           </th>
         </tr>
         <tr>
-          <td class="pl-2">{{ template "browser" (arr "chrome" "safari" "firefox") }}</td>
+          <td class="pl-2">{{ template "browser" (list "chrome" "safari" "firefox") }}</td>
           <td class="p-2">When returning to this site by clicking on a link, the cookie with the {{ template "attr" "SameSite=Strict" }} will not be sent.</td>
         </tr>
       </tbody>
@@ -226,25 +260,22 @@
     </p>
 
     <ul class="mb-2">
-      {{ if not .SecureCookie }}
-        <li class="my-1">{{ template "secureCookiesToggle" "toggleOn" }}</li>
-      {{ end }}
       <li class="my-1">
-        <button @click="deleteAllCookies()" class="{{ $buttonStyle }}">
+        <button @click="reset()" class="{{ $buttonStyle }}">
           <div class="flex justify-center items-center">
-            <img class="w-auto h-6" src="/static/img/wastebasket-32px.png?{{ .CacheBust }}">
-            <span class="ml-1">Remove all cookies</span>
+            {{ template "resetImg" }}
+            <span class="ml-1">Reset Cookies</span>
           </div>
         </button>
       </li>
       <li class="my-1">
-        <button @click="ajaxGET()" class="{{ $buttonStyle }}">
+        <button @click="ajax()" class="{{ $buttonStyle }}">
           Send a {{ template "GET" }} request to receive cookies
         </button>
       </li>
       <li>
         <a class="w-fit p-1 rounded-md shadow-sm mx-auto flex border border-gray-200 justify-center items-center text-blue-500 hover:text-blue-700 hover:underline font-semibold mb-2"
-          href="{{ .AltUrl }}/redirect/explain3{{ if not .SecureCookie }}?sc=false{{ end }}">
+          :href="`{{ .AltUrl }}/redirect/${urlFragment}`">
           <img class="w-auto h-6" src="/static/img/redirect_solid-32px.png?{{ .CacheBust }}">
           <span>302 redirect from a different site</span>
         </a>
@@ -254,6 +285,8 @@
     <div class="flex flex-row justify-center my-4">
       {{ template "browserCookies" . }}
     </div>
+    {{ template "cookieToggle" (dict "Attr" "secure") }}
+    {{ template "cookieToggle" (dict "Attr" "partitioned") }}
 
     <table class="mx-8 mb-2 text-center bg-gray-50 rounded-lg border border-blue-50 shadow-sm">
       <tbody class="text-sm divide-y divide-gray-100">
@@ -263,11 +296,11 @@
           </th>
         </tr>
         <tr>
-          <td class="pl-2">{{ template "browser" (arr "safari" "firefox") }}</td>
+          <td class="pl-2">{{ template "browser" (list "safari" "firefox") }}</td>
           <td class="p-2">Only {{ template "attr" "Lax" }} and {{ template "attr" "None" }} cookies are sent after being redirected to this site from a different site.</td>
         </tr>
         <tr>
-          <td class="pl-2">{{ template "browser" (arr "chrome") }}</td>
+          <td class="pl-2">{{ template "browser" (list "chrome") }}</td>
           <td class="p-2">All cookies are sent after a 302 redirect from a different site.</td>
         </tr>
       </tbody>
@@ -290,22 +323,25 @@
 
     <ul class="mb-2">
       <li class="my-1">
-        {{ template "secureCookiesToggle" "toggleOff" }}
-      </li>
-      <li class="my-1">
-        <button @click="deleteAllCookies()" class="{{ $buttonStyle }}">
+        <button @click="reset()" class="{{ $buttonStyle }}">
           <div class="flex justify-center items-center">
-            <img class="w-auto h-6" src="/static/img/wastebasket-32px.png?{{ .CacheBust }}">
-            <span>Remove all cookies</span>
+            {{ template "resetImg" }}
+            <span class="ml-1">Reset Cookies</span>
           </div>
         </button>
       </li>
-      <li class="my-1"> <button @click="ajaxGET()" class="{{ $buttonStyle }}">Send a {{ template "GET" }} request</button></li>
+      <li class="my-1">
+        Ensure that secure cookies are false
+        {{ template "cookieToggle" (dict "Attr" "secure") }}
+      </li>
+      <li class="my-1"> <button @click="ajax()" class="{{ $buttonStyle }}">Send a {{ template "GET" }} request</button></li>
     </ol>
 
     <div class="flex flex-row justify-center my-4">
       {{ template "browserCookies" . }}
     </div>
+    {{ template "cookieToggle" (dict "Attr" "secure") }}
+    {{ template "cookieToggle" (dict "Attr" "partitioned") }}
 
     <table class="mx-8 mb-2 text-center bg-gray-50 rounded-lg border border-blue-50 shadow-sm">
       <tbody class="text-sm divide-y divide-gray-100">
@@ -315,11 +351,11 @@
           </th>
         </tr>
         <tr>
-          <td class="pl-2">{{ template "browser" (arr "safari" "firefox") }}</td>
+          <td class="pl-2">{{ template "browser" (list "safari" "firefox") }}</td>
           <td class="p-2">It's likely that all cookies are received with {{ template "attr" "secure=false" }}.</td>
         </tr>
         <tr>
-          <td class="pl-2">{{ template "browser" (arr "chrome") }}</td>
+          <td class="pl-2">{{ template "browser" (list "chrome") }}</td>
           <td class="p-2">Cookies with {{ template "attr" "SameSite=None" }} cannot be received unless {{ template "attr" "secure=true" }} is set on the cookie.</td>
         </tr>
       </tbody>
@@ -355,6 +391,8 @@
     <div class="flex flex-row justify-center my-4">
       {{ template "browserCookies" . }}
     </div>
+    {{ template "cookieToggle" (dict "Attr" "secure") }}
+    {{ template "cookieToggle" (dict "Attr" "partitioned") }}
 
     <table class="mx-8 mb-2 text-center bg-gray-50 rounded-lg border border-blue-50 shadow-sm">
       <tbody class="text-sm divide-y divide-gray-100">
@@ -364,7 +402,7 @@
           </th>
         </tr>
         <tr>
-          <td class="pl-2">{{ template "browser" (arr "chrome" "firefox" "safari") }}</td>
+          <td class="pl-2">{{ template "browser" (list "chrome" "firefox" "safari") }}</td>
           <td class="p-2">Just like navigating to page from a different site, when visiting a page from a QR code the cookie with the {{ template "attr" "SameSite=Strict" }} will not be sent.</td>
         </tr>
       </tbody>
@@ -382,8 +420,10 @@
     <h3 class="{{ $explainHClass }}"><a href="#playground">Playground</a></h3>
     <div class="flex flex-row justify-center my-4">
       {{ template "browserCookies" . }}
-      <iframe class="diduthinkIFrame" src="{{ .AltUrl }}/iframe{{ if not .SecureCookie }}?sc=false{{ end }}" frameborder="0" height="{{ $IFrameHeight }}" scrolling="no" width="150"></iframe>
+      <iframe class="surveymojiIFrame" src="{{ .AltUrl }}/iframe{{ if not .SecureCookie }}?sc=false{{ end }}" frameborder="0" height="{{ $IFrameHeight }}" scrolling="no" width="150"></iframe>
     </div>
+    {{ template "cookieToggle" (dict "Attr" "secure") }}
+    {{ template "cookieToggle" (dict "Attr" "partitioned") }}
     {{ template "cookieLegend" }}
     <div class="flex flex-col w-full mx-auto items-center">
       <div class="flex flex-row mb-2">
@@ -392,29 +432,26 @@
       </div>
       <div class="w-full mb-2">
         <a class="w-fit p-1 mx-auto flex border border-gray-200 justify-center items-center md:text-lg text-md text-blue-500 hover:text-blue-700 hover:underline font-semibold mb-2"
-          href="{{ .AltUrl }}/redirect/playground{{ if not .SecureCookie }}?sc=false{{ end }}">
+          :href="`{{ .AltUrl }}/redirect/${urlFragment}`">
           <img class="w-auto h-6" src="/static/img/redirect_solid-32px.png?{{ .CacheBust }}">
           <span>302 redirect from a different site</span>
         </a>
         <a class="w-fit p-1 mx-auto flex border border-gray-200 justify-center items-center md:text-lg text-md text-blue-500 hover:text-blue-700 hover:underline font-semibold"
-          href="{{ .AltUrl }}/link/playground{{ if not .SecureCookie }}?sc=false{{ end }}">
+          :href="`{{ .AltUrl }}/link/${urlFragment}`">
           <img class="w-auto h-6" src="/static/img/link-32px.png?{{ .CacheBust }}">
           <span>Link back to this site from a different site</span>
         </a>
-      </div>
-      <div class="flex items-center mb-2">
-        {{ template "secureCookiesToggle" "" }}
       </div>
     </div>
 
     <div class="flex w-full mx-auto items-center mb-4">
       <div class="w-full mx-2">
         <div class="flex flex-row mb-2">
-          <button @click="ajaxGET()"
+          <button @click="ajax()"
             class="w-1/2 px-4 py-2 mr-1 bg-green-500 hover:bg-green-600 text-white font-semibold rounded shadow-md focus:outline-none">
             Ajax GET
           </button>
-          <button @click="ajaxPOST()"
+          <button @click="ajax('post')"
             class="w-1/2 px-4 py-2 ml-1 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded shadow-md focus:outline-none ">
             Ajax POST
           </button>
@@ -422,13 +459,13 @@
         <div class="flex flex-row">
           <button @click="location.reload()"
             class="flex items-center justify-center w-1/2 px-4 py-2 mr-1 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded shadow-md focus:outline-none">
-            <img class="w-auto h-6" src="/static/img/refresh-32px.png?{{ .CacheBust }}">
+            {{ template "refreshImg" }}
             <span class="ml-1">Refresh Page</span>
           </button>
-          <button @click="deleteAllCookies()"
-            class="flex items-center justify-center w-1/2 px-4 py-2 ml-1 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded shadow-md focus:outline-none">
-            <img class="w-auto h-6" src="/static/img/wastebasket-32px.png?{{ .CacheBust }}">
-            <span class="ml-1">Remove All</span>
+          <button @click="reset()"
+            class="flex items-center justify-center w-1/2 px-4 py-2 ml-1 border border-gray-200 hover:bg-gray-200 text-black font-semibold rounded shadow-md focus:outline-none">
+            {{ template "resetImg" }}
+            <span class="ml-1">Reset Cookies</span>
           </button>
         </div>
       </div>

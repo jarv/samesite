@@ -1,7 +1,0 @@
-#!/usr/bin/env bash
-set -xe
-shopt -s globstar extglob
-go_app=(!(*_test).go)
-watch_files=(**/*.{tmpl,go} src/**/* package-lock.json)
-
-ls -- "${watch_files[@]}" | entr -r bash -c "./bin/build-assets && go run ${go_app[*]}"

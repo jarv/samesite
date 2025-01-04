@@ -3,11 +3,11 @@
     window.onload = function() {
         setTimeout(function() {
           window.location.href = "{{ .LinkUrl }}";
-        }, 2000);
+        }, 5000);
     }
 </script>
 <div class="border border-stone-300 justify-center md:text-xl text-md mx-auto text-center mt-10 rounded p-4 shadow-sm w-fit">
-  Redirecting in 2 seconds..
+  Redirecting in 1 second..
   <a class="text-blue-500 hover:text-blue-700 hover:underline font-semibold" href="{{ .LinkUrl}}">{{ .PrimaryDomain }}</a>
 </div>
 {{ template "footer" . }}
